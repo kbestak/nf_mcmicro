@@ -87,11 +87,14 @@ def stitch_tiles_vertical(tile1, tile2, overlap):
 
     if len(lower_edge_unique) > 0:
         for unique_edge in lower_edge_unique:
+            print(unique_edge)
+            print(np.where(final_overlap[-1,:] == unique_edge))
+            print(np.floor(np.mean(np.where(final_overlap[-1,:] == unique_edge))))
             position_to_check = np.rint(np.median(np.where(final_overlap[-1,:] == unique_edge))).astype(np.uint32)
             if image2_no_overlap[0,position_to_check] != 0:
-                print('position_to_check:', position_to_check)
-                print('unique_edge:', unique_edge)
-                print('value', image2_no_overlap[0,position_to_check])
+                #print('position_to_check:', position_to_check)
+                ##print('unique_edge:', unique_edge)
+                #print('value', image2_no_overlap[0,position_to_check])
                 final_overlap = np.where(final_overlap == final_overlap[-1, position_to_check], image2_no_overlap[0,position_to_check], final_overlap)
 
     image_combined = np.concatenate((image1_no_overlap, final_overlap, image2_no_overlap), axis=0)
