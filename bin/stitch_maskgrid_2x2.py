@@ -76,7 +76,8 @@ def stitch_tiles_vertical(tile1, tile2, overlap):
     upper_edge_unique = upper_edge_unique[upper_edge_unique != 0]
     lower_edge_unique = np.unique(final_overlap[-1,:])
     lower_edge_unique = lower_edge_unique[lower_edge_unique != 0]
-
+    print(f'Lower: {lower_edge_unique}')
+    
     if len(upper_edge_unique) > 0:
         for unique_edge in upper_edge_unique:
             position_to_check = int(np.rint(np.mean(np.where(final_overlap[0,:] == unique_edge))))
