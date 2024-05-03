@@ -74,10 +74,7 @@ def stitch_tiles_vertical(tile1, tile2, overlap):
 
     upper_edge_unique = np.unique(final_overlap[0,:])
     upper_edge_unique = upper_edge_unique[upper_edge_unique != 0]
-    lower_edge_unique = np.unique(final_overlap[-1,:])
-    lower_edge_unique = lower_edge_unique[lower_edge_unique != 0]
-    print(f'Lower: {lower_edge_unique}')
-    
+
     if len(upper_edge_unique) > 0:
         for unique_edge in upper_edge_unique:
             position_to_check = int(np.rint(np.mean(np.where(final_overlap[0,:] == unique_edge))))
@@ -86,6 +83,10 @@ def stitch_tiles_vertical(tile1, tile2, overlap):
                 #print('unique_edge:', unique_edge)
                 #print('value', image1_no_overlap[-1,position_to_check])
                 final_overlap = np.where(final_overlap == final_overlap[0, position_to_check], image1_no_overlap[-1,position_to_check], final_overlap)
+
+    lower_edge_unique = np.unique(final_overlap[-1,:])
+    lower_edge_unique = lower_edge_unique[lower_edge_unique != 0]
+    print(f'Lower: {lower_edge_unique}')
 
     if len(lower_edge_unique) > 0:
         for unique_edge in lower_edge_unique:
@@ -167,8 +168,6 @@ def stitch_tiles_horizontal(tile1, tile2, overlap):
 
     upper_edge_unique = np.unique(final_overlap[:,0])
     upper_edge_unique = upper_edge_unique[upper_edge_unique != 0]
-    lower_edge_unique = np.unique(final_overlap[:,-1])
-    lower_edge_unique = lower_edge_unique[lower_edge_unique != 0]
 
     if len(upper_edge_unique) > 0:
         for unique_edge in upper_edge_unique:
@@ -178,6 +177,9 @@ def stitch_tiles_horizontal(tile1, tile2, overlap):
                 ##print('unique_edge:', unique_edge)
                 ##print('value', image1_no_overlap[position_to_check,-1])
                 final_overlap = np.where(final_overlap == final_overlap[position_to_check,0], image1_no_overlap[position_to_check,-1], final_overlap)
+
+    lower_edge_unique = np.unique(final_overlap[:,-1])
+    lower_edge_unique = lower_edge_unique[lower_edge_unique != 0]
 
     if len(lower_edge_unique) > 0:
         for unique_edge in lower_edge_unique:
