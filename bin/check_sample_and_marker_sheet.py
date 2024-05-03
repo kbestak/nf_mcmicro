@@ -26,7 +26,7 @@ class RowChecker:
 
     """
 
-    VALID_IMAGE_FORMATS = (".tiff", ".tif")
+    VALID_IMAGE_FORMATS = (".tiff", ".tif", ".qptiff")
 
     VALID_MARKER_FORMATS = ".csv"
 

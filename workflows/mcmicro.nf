@@ -13,6 +13,10 @@ include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pi
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_mcmicro_pipeline'
 include { MULTIQC                } from '../modules/nf-core/multiqc/main'
 
+include { EXTRACTCHANNELS } from '../modules/local/extractchannels'
+include { UNSTITCH        } from '../modules/local/unstitch'
+include { RESTITCH        } from '../modules/local/restitch'
+
 include { INPUT_CHECK } from '../subworkflows/local/input_check'
 
 include { BASICPY } from '../modules/nf-core/basicpy/main'
@@ -35,7 +39,6 @@ workflow MCMICRO {
     ch_samplesheet // channel: samplesheet read in from --input
 
     main:
-
     ch_versions = Channel.empty()
     ch_multiqc_files = Channel.empty()
 
@@ -45,7 +48,7 @@ workflow MCMICRO {
         "marker_sheet",
         skip_duplicate_check: false
         )
-
+    ch_from_marker_sheet.view()
     //
     // MODULE: BASICPY
     //
@@ -120,10 +123,32 @@ workflow MCMICRO {
     }
 
     INPUT_CHECK( input_type, params.input_sample, params.input_cycle, params.marker_sheet )
-
     // ASHLAR(ch_samplesheet.ashlar_input, [], [])
-    ASHLAR(ch_samplesheet, ch_dfp, ch_ffp)
-    ch_versions = ch_versions.mix(ASHLAR.out.versions)
+    if ( !params.skip_registration ) {
+        ASHLAR(ch_samplesheet, ch_dfp, ch_ffp)
+        ch_versions = ch_versions.mix(ASHLAR.out.versions)
+    }
+
+    if ( params.extract_channel ){
+        EXTRACTCHANNELS(ch_samplesheet, params.marker_sheet)
+        ch_versions = ch_versions.mix(EXTRACTCHANNELS.out.versions)
+    }
+
+    if ( params.unstitch_restitch ){
+        UNSTITCH(ch_samplesheet, params.marker_sheet)
+        ch_versions = ch_versions.mix(EXTRACTCHANNELS.out.versions)
+
+        UNSTITCH.out.tiles.flatMap { meta, fileList ->
+            fileList.collect { file ->
+                def tileId = file.toString().tokenize('_').last().tokenize('.').first()
+                def newMeta = meta.clone()
+                newMeta.put("tileID", tileId)
+                tuple(newMeta, file)
+            }
+        }.set { segmentation_input }
+    }
+
+    params.unstitch_restitch ? segmentation_input.set {seg_input} : params.skip_registration ? ch_samplesheet.set { seg_input } : ASHLAR.out.tif.set { seg_input }
 
     // // Run Background Correction
     // BACKSUB(ASHLAR.out.tif, ch_markers)
@@ -132,11 +157,31 @@ workflow MCMICRO {
 
     // Run Segmentation
 
-    DEEPCELL_MESMER(ASHLAR.out.tif, [[:],[]])
+    DEEPCELL_MESMER(seg_input, [[:],[]])
     ch_versions = ch_versions.mix(DEEPCELL_MESMER.out.versions)
 
+    if ( params.unstitch_restitch ){
+        DEEPCELL_MESMER.out.mask
+            .map {
+                meta, tiff -> [meta.subMap("id"), tiff, meta.tileID]
+            }.groupTuple()
+            .map{
+                meta, paths, tileids -> [meta, [paths[0], tileids[0]], [paths[1], tileids[1]], [paths[2], tileids[2]], [paths[3], tileids[3]]]
+            }.map{
+                meta, tile1, tile2, tile3, tile4 -> [meta, [tile1, tile2, tile3, tile4].sort{ it[1] }]
+            }.map{
+                meta, list -> [meta, list[0], list[1], list[2], list[3]] // sorted will have null as first list
+            }.map{
+                [it[0],it[1][0],it[2][0],it[3][0],it[4][0]]
+            }.set { restitch_in }
+        RESTITCH(restitch_in)
+        ch_versions = ch_versions.mix(RESTITCH.out.versions)
+    }
+
+    params.unstitch_restitch ? RESTITCH.out.mask.set { segmentation_out } : DEEPCELL_MESMER.out.mask.set { segmentation_out }
+
     // Run Quantification
-    mcquant_in = ASHLAR.out.tif.join(DEEPCELL_MESMER.out.mask).multiMap { it ->
+    mcquant_in = ch_samplesheet.join(segmentation_out).multiMap { it ->
         image: [it[0], it[1]]
         mask: [it[0], it[2]]
     }
@@ -172,15 +217,15 @@ workflow MCMICRO {
     ch_multiqc_files                      = ch_multiqc_files.mix(ch_collated_versions)
     ch_multiqc_files                      = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml', sort: false))
 
-    MULTIQC (
-        ch_multiqc_files.collect(),
-        ch_multiqc_config.toList(),
-        ch_multiqc_custom_config.toList(),
-        ch_multiqc_logo.toList()
-    )
+    //MULTIQC (
+    //    ch_multiqc_files.collect(),
+    //    ch_multiqc_config.toList(),
+    //    ch_multiqc_custom_config.toList(),
+    //   ch_multiqc_logo.toList()
+    //)
 
     emit:
-    multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
+    multiqc_report = MCQUANT.out.csv // channel: /path/to/multiqc_report.html
     versions       = ch_versions                 // channel: [ path(versions.yml) ]
 }
 

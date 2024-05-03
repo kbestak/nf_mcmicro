@@ -16,7 +16,8 @@ workflow INPUT_CHECK {
     marker_sheet        // file: /path/to/marker_sheet.csv
 
     main:
-
+    println(params.input_sample)
+    println(marker_sheet)
     if ( input_type == "sample" ) {
         /* commented out redundant checks
         SAMPLESHEET_CHECK ( input_type, samplesheet_sample )

@@ -65,6 +65,18 @@
                     "type": "string",
                     "enum": ["manual", "basicpy"],
                     "description": "input that defines type of illumination correction to be performed"
+                },
+                "skip_registration": {
+                    "type": "boolean",
+                    "description": "Should registration be skipped"
+                },
+                "extract_channel": {
+                    "type": "boolean",
+                    "description": "Should channel 6 (index start 1) be extracted"
+                },
+                "unstitch_restitch": {
+                    "type": "boolean",
+                    "description": "Should the input image be unstitched, segmented and restitched for cases with extreme numbers of cells."
                 }
             }
         },
