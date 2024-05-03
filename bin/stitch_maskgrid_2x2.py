@@ -41,6 +41,9 @@ def stitch_tiles_vertical(tile1, tile2, overlap):
     centroids1_overlap_above = centroids1_overlap[centroids1_overlap[:,0] < overlap//2,:]
     if len(centroids1_overlap_above) > 0:
         for centroid in centroids1_overlap_above:
+            print(f'Centroid positions: {centroid[0]},{centroid[1]}')
+            print(label1_overlap[centroid[0], centroid[1]])
+            print()
             if label1_overlap[centroid[0], centroid[1]] != 0:
                 final_overlap = np.where(label1_overlap == label1_overlap[centroid[0], centroid[1]], label1_overlap, final_overlap)
                 label1_overlap = np.where(label1_overlap == label1_overlap[centroid[0], centroid[1]], 0, label1_overlap)
