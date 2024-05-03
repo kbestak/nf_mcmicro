@@ -39,30 +39,32 @@ def stitch_tiles_vertical(tile1, tile2, overlap):
     final_overlap = np.zeros((overlap, image1.shape[1]), dtype=np.uint32)
 
     centroids1_overlap_above = centroids1_overlap[centroids1_overlap[:,0] < overlap//2,:]
-
-    for centroid in centroids1_overlap_above:
-        if label1_overlap[centroid[0], centroid[1]] != 0:
-            final_overlap = np.where(label1_overlap == label1_overlap[centroid[0], centroid[1]], label1_overlap, final_overlap)
-            label1_overlap = np.where(label1_overlap == label1_overlap[centroid[0], centroid[1]], 0, label1_overlap)
-            label2_overlap = np.where(label2_overlap == label2_overlap[centroid[0], centroid[1]], 0, label2_overlap)
+    if len(centroids1_overlap_above) > 0:
+        for centroid in centroids1_overlap_above:
+            if label1_overlap[centroid[0], centroid[1]] != 0:
+                final_overlap = np.where(label1_overlap == label1_overlap[centroid[0], centroid[1]], label1_overlap, final_overlap)
+                label1_overlap = np.where(label1_overlap == label1_overlap[centroid[0], centroid[1]], 0, label1_overlap)
+                label2_overlap = np.where(label2_overlap == label2_overlap[centroid[0], centroid[1]], 0, label2_overlap)
     label2_overlap = skimage.measure.label(label2_overlap, background=0)
     label2_overlap = np.where(label2_overlap == 0, 0, label2_overlap+maxlabel)
 
     regions2_overlap = skimage.measure.regionprops(label2_overlap)
     centroids2_overlap = np.array([np.round(r.centroid).astype(np.uint32) for r in regions2_overlap])
 
-    for centroid in centroids2_overlap:
-        if label2_overlap[centroid[0], centroid[1]] != 0:
-            final_overlap = np.where(label2_overlap == label2_overlap[centroid[0], centroid[1]], label2_overlap, final_overlap)
-            label1_overlap = np.where(label1_overlap == label1_overlap[centroid[0], centroid[1]], 0, label1_overlap)
-            label2_overlap = np.where(label2_overlap == label2_overlap[centroid[0], centroid[1]], 0, label2_overlap)
+    if len(centroids2_overlap) > 0:
+        for centroid in centroids2_overlap:
+            if label2_overlap[centroid[0], centroid[1]] != 0:
+                final_overlap = np.where(label2_overlap == label2_overlap[centroid[0], centroid[1]], label2_overlap, final_overlap)
+                label1_overlap = np.where(label1_overlap == label1_overlap[centroid[0], centroid[1]], 0, label1_overlap)
+                label2_overlap = np.where(label2_overlap == label2_overlap[centroid[0], centroid[1]], 0, label2_overlap)
 
     regions1_leftover = skimage.measure.regionprops(label1_overlap)
     centroids1_leftover = np.array([np.round(r.centroid).astype(np.uint32) for r in regions1_leftover])
 
-    for centroid in centroids1_leftover:
-        if label1_overlap[centroid[0], centroid[1]] != 0:
-            final_overlap = np.where(label1_overlap == label1_overlap[centroid[0], centroid[1]], label1_overlap, final_overlap)
+    if len(centroids1_leftover) > 0:
+        for centroid in centroids1_leftover:
+            if label1_overlap[centroid[0], centroid[1]] != 0:
+                final_overlap = np.where(label1_overlap == label1_overlap[centroid[0], centroid[1]], label1_overlap, final_overlap)
 
     final_overlap = skimage.measure.label(final_overlap, background=0)
 
@@ -125,30 +127,32 @@ def stitch_tiles_horizontal(tile1, tile2, overlap):
 
 
     centroids1_overlap_above = centroids1_overlap[:,centroids1_overlap[0,:] < overlap//2]
-
-    for centroid in centroids1_overlap_above:
-        if label1_overlap[centroid[0], centroid[1]] != 0:
-            final_overlap = np.where(label1_overlap == label1_overlap[centroid[0], centroid[1]], label1_overlap, final_overlap)
-            label1_overlap = np.where(label1_overlap == label1_overlap[centroid[0], centroid[1]], 0, label1_overlap)
-            label2_overlap = np.where(label2_overlap == label2_overlap[centroid[0], centroid[1]], 0, label2_overlap)
+    if len(centroids1_overlap_above) > 0:
+        for centroid in centroids1_overlap_above:
+            if label1_overlap[centroid[0], centroid[1]] != 0:
+                final_overlap = np.where(label1_overlap == label1_overlap[centroid[0], centroid[1]], label1_overlap, final_overlap)
+                label1_overlap = np.where(label1_overlap == label1_overlap[centroid[0], centroid[1]], 0, label1_overlap)
+                label2_overlap = np.where(label2_overlap == label2_overlap[centroid[0], centroid[1]], 0, label2_overlap)
     label2_overlap = skimage.measure.label(label2_overlap, background=0)
     label2_overlap = np.where(label2_overlap == 0, 0, label2_overlap+maxlabel)
 
     regions2_overlap = skimage.measure.regionprops(label2_overlap)
     centroids2_overlap = np.array([np.round(r.centroid).astype(np.uint32) for r in regions2_overlap])
 
-    for centroid in centroids2_overlap:
-        if label2_overlap[centroid[0], centroid[1]] != 0:
-            final_overlap = np.where(label2_overlap == label2_overlap[centroid[0], centroid[1]], label2_overlap, final_overlap)
-            label1_overlap = np.where(label1_overlap == label1_overlap[centroid[0], centroid[1]], 0, label1_overlap)
-            label2_overlap = np.where(label2_overlap == label2_overlap[centroid[0], centroid[1]], 0, label2_overlap)
+    if len(centroids2_overlap) > 0:
+        for centroid in centroids2_overlap:
+            if label2_overlap[centroid[0], centroid[1]] != 0:
+                final_overlap = np.where(label2_overlap == label2_overlap[centroid[0], centroid[1]], label2_overlap, final_overlap)
+                label1_overlap = np.where(label1_overlap == label1_overlap[centroid[0], centroid[1]], 0, label1_overlap)
+                label2_overlap = np.where(label2_overlap == label2_overlap[centroid[0], centroid[1]], 0, label2_overlap)
 
     regions1_leftover = skimage.measure.regionprops(label1_overlap)
     centroids1_leftover = np.array([np.round(r.centroid).astype(np.uint32) for r in regions1_leftover])
 
-    for centroid in centroids1_leftover:
-        if label1_overlap[centroid[0], centroid[1]] != 0:
-            final_overlap = np.where(label1_overlap == label1_overlap[centroid[0], centroid[1]], label1_overlap, final_overlap)
+    if len(centroids1_leftover) > 0:
+        for centroid in centroids1_leftover:
+            if label1_overlap[centroid[0], centroid[1]] != 0:
+                final_overlap = np.where(label1_overlap == label1_overlap[centroid[0], centroid[1]], label1_overlap, final_overlap)
 
     final_overlap = skimage.measure.label(final_overlap, background=0)
 
