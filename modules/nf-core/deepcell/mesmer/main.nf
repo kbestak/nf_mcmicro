@@ -1,6 +1,6 @@
 process DEEPCELL_MESMER {
     tag "$meta.id"
-    label 'process_low'
+    label 'process_high'
 
     container "docker.io/wuennemannflorian/deepcell_mesmer:0.4.1_noentry"
 

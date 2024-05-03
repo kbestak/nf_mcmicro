@@ -77,6 +77,17 @@
                 "unstitch_restitch": {
                     "type": "boolean",
                     "description": "Should the input image be unstitched, segmented and restitched for cases with extreme numbers of cells."
+                },
+                "pixel_size": {
+                    "type": "number",
+                    "description": "What is the pixel size of the image in microns.",
+                    "default": 1.0
+                },
+                "mesmer_model": {
+                    "type": "string",
+                    "default": "nuclear",
+                    "description": "Which model should Deepcell Mesmer use - \"nuclear\", \"whole-cell\"",
+                    "enum": ["nuclear", "whole-cell"]
                 }
             }
         },
