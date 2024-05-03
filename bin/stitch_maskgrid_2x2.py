@@ -73,7 +73,7 @@ def stitch_tiles_vertical(tile1, tile2, overlap):
 
     if len(upper_edge_unique) > 0:
         for unique_edge in upper_edge_unique:
-            position_to_check = np.floor(np.median(np.where(final_overlap[0,:] == unique_edge))).astype(uint32)
+            position_to_check = np.floor(np.median(np.where(final_overlap[0,:] == unique_edge))).astype(np.uint32)
             if image1_no_overlap[-1,position_to_check] != 0:
                 print('position_to_check:', position_to_check)
                 print('unique_edge:', unique_edge)
@@ -82,7 +82,7 @@ def stitch_tiles_vertical(tile1, tile2, overlap):
 
     if len(lower_edge_unique) > 0:
         for unique_edge in lower_edge_unique:
-            position_to_check = np.floor(np.median(np.where(final_overlap[-1,:] == unique_edge))).astype(uint32)
+            position_to_check = np.floor(np.median(np.where(final_overlap[-1,:] == unique_edge))).astype(np.uint32)
             if image2_no_overlap[0,position_to_check] != 0:
                 print('position_to_check:', position_to_check)
                 print('unique_edge:', unique_edge)
@@ -159,7 +159,7 @@ def stitch_tiles_horizontal(tile1, tile2, overlap):
 
     if len(upper_edge_unique) > 0:
         for unique_edge in upper_edge_unique:
-            position_to_check = np.floor(np.median(np.where(final_overlap[:,0] == unique_edge))).astype(uint32)
+            position_to_check = np.floor(np.median(np.where(final_overlap[:,0] == unique_edge))).astype(np.uint32)
             if image1_no_overlap[position_to_check,-1] != 0:
                 ##print('position_to_check:', position_to_check)
                 ##print('unique_edge:', unique_edge)
@@ -168,7 +168,7 @@ def stitch_tiles_horizontal(tile1, tile2, overlap):
 
     if len(lower_edge_unique) > 0:
         for unique_edge in lower_edge_unique:
-            position_to_check = np.floor(np.median(np.where(final_overlap[:,-1] == unique_edge))).astype(uint32)
+            position_to_check = np.floor(np.median(np.where(final_overlap[:,-1] == unique_edge))).astype(np.uint32)
             if image2_no_overlap[position_to_check,0] != 0:
                 ##print('position_to_check:', position_to_check)
                 ##print('unique_edge:', unique_edge)
