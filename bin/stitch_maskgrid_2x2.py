@@ -16,6 +16,9 @@ def stitch_tiles_vertical(tile1, tile2, overlap):
     overlap1 = image1[-overlap:, :]
     overlap2 = image2[:overlap, :]
 
+    # keep_overlap is the region where both overlap1 and overlap2 aren't 0
+    keep_overlap = np.logical_and(overlap1 == 0, overlap2 == 0)
+
     image1_no_overlap = image1[:-overlap, :]
     image2_no_overlap = image2[overlap:, :]
 
@@ -39,7 +42,7 @@ def stitch_tiles_vertical(tile1, tile2, overlap):
     print(centroids1_overlap)
     final_overlap = np.zeros((overlap, image1.shape[1]), dtype=np.uint32)
 
-    centroids1_overlap_above = centroids1_overlap[centroids1_overlap[:,0] < overlap//2,:]
+    centroids1_overlap_above = centroids1_overlap[centroids1_overlap[:, 0] < overlap//2]
     if len(centroids1_overlap_above) > 0:
         for centroid in centroids1_overlap_above:
             print(f'Centroid positions: {centroid[0]},{centroid[1]}')
@@ -77,31 +80,35 @@ def stitch_tiles_vertical(tile1, tile2, overlap):
 
     if len(upper_edge_unique) > 0:
         for unique_edge in upper_edge_unique:
-            position_to_check = int(np.rint(np.mean(np.where(final_overlap[0,:] == unique_edge))))
-            if image1_no_overlap[-1,position_to_check] != 0:
-                ##print('position_to_check:', position_to_check)
-                #print('unique_edge:', unique_edge)
-                #print('value', image1_no_overlap[-1,position_to_check])
-                final_overlap = np.where(final_overlap == final_overlap[0, position_to_check], image1_no_overlap[-1,position_to_check], final_overlap)
+            if len(np.where(final_overlap[0,:] == unique_edge)[0]) != 0:
+                position_to_check = int(np.rint(np.mean(np.where(final_overlap[0,:] == unique_edge))))
+                if image1_no_overlap[-1,position_to_check] != 0:
+                    ##print('position_to_check:', position_to_check)
+                    #print('unique_edge:', unique_edge)
+                    #print('value', image1_no_overlap[-1,position_to_check])
+                    final_overlap = np.where(final_overlap == final_overlap[0, position_to_check], image1_no_overlap[-1,position_to_check], final_overlap)
 
     lower_edge_unique = np.unique(final_overlap[-1,:])
     lower_edge_unique = lower_edge_unique[lower_edge_unique != 0]
     print(f'Lower: {lower_edge_unique}')
     print(np.unique(final_overlap[-1,:]))
-
+    before = copy.copy(final_overlap)
+    before = np.where(~keep_overlap, final_overlap, 0)
     if len(lower_edge_unique) > 0:
         for unique_edge in lower_edge_unique:
-            print(unique_edge)
-            print(np.where(final_overlap[-1,:] == unique_edge))
-            print(np.floor(np.mean(np.where(final_overlap[-1,:] == unique_edge))))
-            position_to_check = int(np.rint(np.mean(np.where(final_overlap[-1,:] == unique_edge))))
-            if image2_no_overlap[0,position_to_check] != 0:
-                #print('position_to_check:', position_to_check)
-                ##print('unique_edge:', unique_edge)
-                #print('value', image2_no_overlap[0,position_to_check])
-                final_overlap = np.where(final_overlap == final_overlap[-1, position_to_check], image2_no_overlap[0,position_to_check], final_overlap)
+            if len(np.where(final_overlap[-1,:] == unique_edge)[0]) != 0:
+                print(unique_edge)
+                print(np.where(final_overlap[-1,:] == unique_edge))
+                print(np.floor(np.mean(np.where(final_overlap[-1,:] == unique_edge))))
+                position_to_check = int(np.rint(np.mean(np.where(final_overlap[-1,:] == unique_edge))))
+                if image2_no_overlap[0,position_to_check] != 0:
+                    #print('position_to_check:', position_to_check)
+                    ##print('unique_edge:', unique_edge)
+                    #print('value', image2_no_overlap[0,position_to_check])
+                    before = np.where(before == before[-1, position_to_check], image2_no_overlap[0,position_to_check], before)
 
-    image_combined = np.concatenate((image1_no_overlap, final_overlap, image2_no_overlap), axis=0)
+    #before = skimage.measure.label(before, background=0)
+    image_combined = np.concatenate((image1_no_overlap, before, image2_no_overlap), axis=0)
     image_combined = skimage.measure.label(image_combined, background=0)
 
     return image_combined
@@ -137,7 +144,7 @@ def stitch_tiles_horizontal(tile1, tile2, overlap):
     final_overlap = np.zeros((image1.shape[0],overlap), dtype=np.uint32)
 
 
-    centroids1_overlap_above = centroids1_overlap[:,centroids1_overlap[0,:] < overlap//2]
+    centroids1_overlap_above = centroids1_overlap[centroids1_overlap[:, 1] < overlap//2]
     if len(centroids1_overlap_above) > 0:
         for centroid in centroids1_overlap_above:
             if label1_overlap[centroid[0], centroid[1]] != 0:
@@ -172,24 +179,26 @@ def stitch_tiles_horizontal(tile1, tile2, overlap):
 
     if len(upper_edge_unique) > 0:
         for unique_edge in upper_edge_unique:
-            position_to_check = int(np.rint(np.mean(np.where(final_overlap[:,0] == unique_edge))))
-            if image1_no_overlap[position_to_check,-1] != 0:
-                ##print('position_to_check:', position_to_check)
-                ##print('unique_edge:', unique_edge)
-                ##print('value', image1_no_overlap[position_to_check,-1])
-                final_overlap = np.where(final_overlap == final_overlap[position_to_check,0], image1_no_overlap[position_to_check,-1], final_overlap)
+            if len(np.where(final_overlap[:,0] == unique_edge)[0]) != 0:
+                position_to_check = int(np.rint(np.mean(np.where(final_overlap[:,0] == unique_edge))))
+                if image1_no_overlap[position_to_check,-1] != 0:
+                    ##print('position_to_check:', position_to_check)
+                    ##print('unique_edge:', unique_edge)
+                    ##print('value', image1_no_overlap[position_to_check,-1])
+                    final_overlap = np.where(final_overlap == final_overlap[position_to_check,0], image1_no_overlap[position_to_check,-1], final_overlap)
 
     lower_edge_unique = np.unique(final_overlap[:,-1])
     lower_edge_unique = lower_edge_unique[lower_edge_unique != 0]
 
     if len(lower_edge_unique) > 0:
         for unique_edge in lower_edge_unique:
-            position_to_check = int(np.rint(np.mean(np.where(final_overlap[:,-1] == unique_edge))))
-            if image2_no_overlap[position_to_check,0] != 0:
-                ##print('position_to_check:', position_to_check)
-                ##print('unique_edge:', unique_edge)
-                ##print('value', image2_no_overlap[position_to_check,0])
-                final_overlap = np.where(final_overlap == final_overlap[position_to_check,-1], image2_no_overlap[position_to_check,0], final_overlap)
+            if len(np.where(final_overlap[:,-1] == unique_edge)[0]) != 0:
+                position_to_check = int(np.rint(np.mean(np.where(final_overlap[:,-1] == unique_edge))))
+                if image2_no_overlap[position_to_check,0] != 0:
+                    ##print('position_to_check:', position_to_check)
+                    ##print('unique_edge:', unique_edge)
+                    ##print('value', image2_no_overlap[position_to_check,0])
+                    final_overlap = np.where(final_overlap == final_overlap[position_to_check,-1], image2_no_overlap[position_to_check,0], final_overlap)
 
     final_overlap = skimage.morphology.remove_small_objects(final_overlap, min_size=10, connectivity=0)
 
@@ -264,6 +273,8 @@ def get_args():
     arg.output = abspath(arg.output)
 
     return arg
+
+
 
 def main(args):
     tile_0 = tifffile.imread(args.tile_0)
