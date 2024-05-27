@@ -16,6 +16,8 @@ include { MULTIQC                } from '../modules/nf-core/multiqc/main'
 include { EXTRACTCHANNELS } from '../modules/local/extractchannels'
 include { UNSTITCH        } from '../modules/local/unstitch'
 include { RESTITCH        } from '../modules/local/restitch'
+include { SPOTIFLOW       } from '../modules/local/spotiflow'
+include { MAPS            } from '../modules/local/maps'
 
 include { INPUT_CHECK } from '../subworkflows/local/input_check'
 
@@ -132,6 +134,9 @@ workflow MCMICRO {
     if ( params.extract_channel ){
         EXTRACTCHANNELS(ch_samplesheet, params.marker_sheet)
         ch_versions = ch_versions.mix(EXTRACTCHANNELS.out.versions)
+
+        SPOTIFLOW(EXTRACTCHANNELS.out.extracted_channel)
+        ch_versions =ch_versions.mix(SPOTIFLOW.out.versions)
     }
 
     if ( params.unstitch_restitch ){
@@ -190,6 +195,11 @@ workflow MCMICRO {
             [[:], file(params.marker_sheet)])
     ch_versions = ch_versions.mix(MCQUANT.out.versions)
 
+    MAPS(MCQUANT.out.csv,
+        Channel.fromPath('/workspace/nf_mcmicro_files/best_model_20240527.pt'),
+        Channel.fromPath('/workspace/nf_mcmicro_files/label_id.csv'),
+        Channel.fromPath(params.marker_sheet))
+    ch_versions = ch_versions.mix(MAPS.out.versions)
     /*
     // // Run Reporting
     SCIMAP_MCMICRO(MCQUANT.out.csv)
