@@ -196,8 +196,8 @@ workflow MCMICRO {
     ch_versions = ch_versions.mix(MCQUANT.out.versions)
 
     MAPS(MCQUANT.out.csv,
-        Channel.fromPath('/workspace/nf_mcmicro_files/best_model_20240527.pt'),
-        Channel.fromPath('/workspace/nf_mcmicro_files/label_id.csv'),
+        Channel.fromPath(params.pretrained_model_maps),
+        Channel.fromPath(params.label_id_maps),
         Channel.fromPath(params.marker_sheet))
     ch_versions = ch_versions.mix(MAPS.out.versions)
     /*

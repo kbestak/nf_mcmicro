@@ -81,13 +81,33 @@
                 "pixel_size": {
                     "type": "number",
                     "description": "What is the pixel size of the image in microns.",
-                    "default": 1.0
+                    "default": 1
                 },
                 "mesmer_model": {
                     "type": "string",
                     "default": "nuclear",
                     "description": "Which model should Deepcell Mesmer use - \"nuclear\", \"whole-cell\"",
                     "enum": ["nuclear", "whole-cell"]
+                },
+                "phenotyping": {
+                    "type": "boolean",
+                    "description": "Should phenotyping with MAPS be performed (requires pretrained_model_maps parameter with model)"
+                },
+                "pretrained_model_maps": {
+                    "type": "string",
+                    "description": "Path to pretrained model for phenotyping with maps.",
+                    "pattern": "^\\S+\\.pt$",
+                    "format": "file-path"
+                },
+                "label_id_maps": {
+                    "type": "string",
+                    "description": "Path to csv with indices matched to phenotypes used when training a MAPS model.",
+                    "pattern": "^\\S+\\.csv$",
+                    "format": "file-path"
+                },
+                "num_features_maps": {
+                    "type": "integer",
+                    "description": "Number of features used when training the MAPS model - work in progress"
                 }
             }
         },
