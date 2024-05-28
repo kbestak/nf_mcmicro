@@ -22,6 +22,7 @@ process EXTRACTCHANNELS {
     extract_channels.py \\
         --input ${image} \\
         --output . \\
+        --output_tag ${prefix} \\
         --markers ${marker_sheet} \\
         $args
 

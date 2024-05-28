@@ -78,6 +78,12 @@
                     "type": "boolean",
                     "description": "Should the input image be unstitched, segmented and restitched for cases with extreme numbers of cells."
                 },
+                "nuclear_channel": {
+                    "type": "integer",
+                    "default": 0,
+                    "description": "Channel (index start 0) to be used as nuclear channel for segmentation",
+                    "minimum": 0
+                },
                 "pixel_size": {
                     "type": "number",
                     "description": "What is the pixel size of the image in microns.",

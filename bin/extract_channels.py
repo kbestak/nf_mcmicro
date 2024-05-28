@@ -71,6 +71,13 @@ def get_args():
         required=True,
         help="Output directory.",
     )
+    inputs.add_argument(
+        "--output_tag",
+        dest="output_tag",
+        action="store",
+        required=True,
+        help="Tag used for naming output files - 'Tag_ChannelName.ome.tif'",
+    )
     inputs.add_argument("--version", action="version", version="0.0.1")
     arg = parser.parse_args()
 
@@ -105,7 +112,7 @@ def main(args):
     print(pyramid[channels[0]].max().compute())
 
     channel_names = markers.marker_name.values[channels]
-    outpath_list = [os.path.join(output_dir, f'{input_name}_{channel_names[i]}.ome.tif') for i in range(len(channels))]
+    outpath_list = [os.path.join(output_dir, f'{args.output_tag}_{channel_names[i]}.tif') for i in range(len(channels))]
     print(f'Pixel size is: {pixel_size}')
     print(outpath_list)
     for idx, channel in enumerate(channels):
