@@ -50,7 +50,7 @@ workflow MCMICRO {
         "marker_sheet",
         skip_duplicate_check: false
         )
-    ch_from_marker_sheet.view()
+
     //
     // MODULE: BASICPY
     //

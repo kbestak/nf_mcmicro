@@ -3,7 +3,7 @@ process MCQUANT {
     label 'process_single'
 
     // WARN: Version information not provided by tool on CLI. Please update version string below when bumping container versions.
-    container "docker.io/kbestak/mcquant_qptiff:1.5.4_cv3"
+    container "docker.io/kbestak/mcquant:1.5.4_cv6"
 
     input:
     tuple val(meta), path(image)
@@ -20,13 +20,14 @@ process MCQUANT {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
-    def VERSION = '1.5.4_cv3' // WARN: Version information not provided by tool on CLI. Please update this string when bumping container versions.
+    def VERSION = '1.5.4_cv6' // WARN: Version information not provided by tool on CLI. Please update this string when bumping container versions.
     """
-    python /app/CommandSingleCellExtraction.py \
-        --masks $mask \
-        --image $image \
-        --channel_names $markerfile \
-        --output . \
+    python /app/CommandSingleCellExtraction.py \\
+        --masks $mask \\
+        --image $image \\
+        --channel_names $markerfile \\
+        --output . \\
+        --output_filename ${prefix}.csv \\
         $args
 
     cat <<-END_VERSIONS > versions.yml
@@ -37,7 +38,7 @@ process MCQUANT {
 
     stub:
     def prefix = task.ext.prefix ?: "${meta.id}"
-    def VERSION = '1.5.4'
+    def VERSION = '1.5.4_cv4'
     """
     touch ${prefix}.csv
 
