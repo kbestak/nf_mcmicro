@@ -195,11 +195,15 @@ workflow MCMICRO {
             [[:], file(params.marker_sheet)])
     ch_versions = ch_versions.mix(MCQUANT.out.versions)
 
-    MAPS(MCQUANT.out.csv,
-        Channel.fromPath(params.pretrained_model_maps),
-        Channel.fromPath(params.label_id_maps),
-        Channel.fromPath(params.marker_sheet))
-    ch_versions = ch_versions.mix(MAPS.out.versions)
+    if ( params.phenotyping ){
+        MAPS(MCQUANT.out.csv,
+            Channel.fromPath(params.pretrained_model_maps),
+            Channel.fromPath(params.label_id_maps),
+            Channel.fromPath(params.marker_sheet))
+        ch_versions = ch_versions.mix(MAPS.out.versions)
+    }
+
+    params.phenotyping ? MAPS.out.phenotypes.set { csv_out } : MCQUANT.out.csv.set { csv_out }
     /*
     // // Run Reporting
     SCIMAP_MCMICRO(MCQUANT.out.csv)
@@ -235,7 +239,7 @@ workflow MCMICRO {
     //)
 
     emit:
-    multiqc_report = MCQUANT.out.csv // channel: /path/to/multiqc_report.html
+    multiqc_report = csv_out // channel: /path/to/multiqc_report.html
     versions       = ch_versions                 // channel: [ path(versions.yml) ]
 }
 
