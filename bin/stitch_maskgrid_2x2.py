@@ -9,6 +9,7 @@ from argparse import ArgumentParser as AP
 import argparse
 import time
 import copy
+import skimage.measure
 
 def longest_contiguous_subsequence(indices):
     if len(indices) == 0:
@@ -64,6 +65,8 @@ def stitch_tiles_vertical(tile1, tile2, overlap):
 
     regions1_overlap = skimage.measure.regionprops(label1_overlap)
     centroids1_overlap = np.array([[int(np.floor(r.centroid)[0]), int(np.floor(r.centroid)[1])] for r in regions1_overlap])
+    if centroids1_overlap.size == 0:
+        centroids1_overlap = np.empty((0, 2), dtype=int)
 
     final_overlap = np.zeros((overlap, image1.shape[1]), dtype=np.uint32)
 
@@ -74,11 +77,14 @@ def stitch_tiles_vertical(tile1, tile2, overlap):
                 final_overlap = np.where(label1_overlap == label1_overlap[centroid[0], centroid[1]], label1_overlap, final_overlap)
                 label1_overlap = np.where(label1_overlap == label1_overlap[centroid[0], centroid[1]], 0, label1_overlap)
                 label2_overlap = np.where(label2_overlap == label2_overlap[centroid[0], centroid[1]], 0, label2_overlap)
+
     label2_overlap = skimage.measure.label(label2_overlap, background=0)
     label2_overlap = np.where(label2_overlap == 0, 0, label2_overlap+maxlabel)
 
     regions2_overlap = skimage.measure.regionprops(label2_overlap)
     centroids2_overlap = np.array([[int(np.floor(r.centroid)[0]), int(np.floor(r.centroid)[1])] for r in regions2_overlap])
+    if centroids2_overlap.size == 0:
+        centroids2_overlap = np.empty((0, 2), dtype=int)
 
     if len(centroids2_overlap) > 0:
         for centroid in centroids2_overlap:
@@ -89,6 +95,8 @@ def stitch_tiles_vertical(tile1, tile2, overlap):
 
     regions1_leftover = skimage.measure.regionprops(label1_overlap)
     centroids1_leftover = np.array([[int(np.floor(r.centroid)[0]), int(np.floor(r.centroid)[1])] for r in regions1_leftover])
+    if centroids1_leftover.size == 0:
+        centroids1_leftover = np.empty((0, 2), dtype=int)
 
     if len(centroids1_leftover) > 0:
         for centroid in centroids1_leftover:
@@ -108,8 +116,8 @@ def stitch_tiles_vertical(tile1, tile2, overlap):
             matching_indices = longest_contiguous_subsequence(matching_indices)
             if len(matching_indices) > 0:  # Check if there are matching indices
                 position_to_check = int(np.floor(np.mean(matching_indices)))
-                if image1_no_overlap[-1,position_to_check] != 0:
-                    before = np.where(before == before[0, position_to_check], image1_no_overlap[-1,position_to_check], before)
+                if image1_no_overlap[-1, position_to_check] != 0:
+                    before = np.where(before == before[0, position_to_check], image1_no_overlap[-1, position_to_check], before)
 
     image_combined = np.concatenate((image1_no_overlap, before), axis=0)
     lower_edge_unique = np.unique(image_combined[-1,:])
@@ -121,14 +129,14 @@ def stitch_tiles_vertical(tile1, tile2, overlap):
             matching_indices = longest_contiguous_subsequence(matching_indices)
             if len(matching_indices) > 0:  # Check if there are matching indices
                 position_to_check = int(np.floor(np.mean(matching_indices)))
-                if image2_no_overlap[0,position_to_check] != 0:
-                    image_combined = np.where(image_combined == image_combined[-1, position_to_check], image2_no_overlap[0,position_to_check], image_combined)
-
+                if image2_no_overlap[0, position_to_check] != 0:
+                    image_combined = np.where(image_combined == image_combined[-1, position_to_check], image2_no_overlap[0, position_to_check], image_combined)
 
     image_combined = np.concatenate((image_combined, image2_no_overlap), axis=0)
     image_combined = skimage.measure.label(image_combined, background=0)
 
     return image_combined
+
 
 def stitch_tiles_horizontal(tile1, tile2, overlap):
     image1 = copy.copy(tile1)
@@ -159,6 +167,8 @@ def stitch_tiles_horizontal(tile1, tile2, overlap):
 
     regions1_overlap = skimage.measure.regionprops(label1_overlap)
     centroids1_overlap = np.array([[int(np.floor(r.centroid)[0]), int(np.floor(r.centroid)[1])] for r in regions1_overlap])
+    if centroids1_overlap.size == 0:
+        centroids1_overlap = np.empty((0, 2), dtype=int)
 
     final_overlap = np.zeros((image1.shape[0], overlap), dtype=np.uint32)
 
@@ -175,6 +185,8 @@ def stitch_tiles_horizontal(tile1, tile2, overlap):
 
     regions2_overlap = skimage.measure.regionprops(label2_overlap)
     centroids2_overlap = np.array([[int(np.floor(r.centroid)[0]), int(np.floor(r.centroid)[1])] for r in regions2_overlap])
+    if centroids2_overlap.size == 0:
+        centroids2_overlap = np.empty((0, 2), dtype=int)
 
     if len(centroids2_overlap) > 0:
         for centroid in centroids2_overlap:
@@ -185,6 +197,8 @@ def stitch_tiles_horizontal(tile1, tile2, overlap):
 
     regions1_leftover = skimage.measure.regionprops(label1_overlap)
     centroids1_leftover = np.array([[int(np.floor(r.centroid)[0]), int(np.floor(r.centroid)[1])] for r in regions1_leftover])
+    if centroids1_leftover.size == 0:
+        centroids1_leftover = np.empty((0, 2), dtype=int)
 
     if len(centroids1_leftover) > 0:
         for centroid in centroids1_leftover:
@@ -224,6 +238,7 @@ def stitch_tiles_horizontal(tile1, tile2, overlap):
     image_combined = skimage.measure.label(image_combined, background=0)
 
     return image_combined
+
 
 def get_args():
     # Script description
