@@ -28,7 +28,7 @@ process RESTITCH {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        restitch: \$(stitch_maskgrid_2x2 --version)
+        restitch: \$(stitch_maskgrid_2x2.py --version)
     END_VERSIONS
     """
 }
