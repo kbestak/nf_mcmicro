@@ -196,10 +196,17 @@ workflow MCMICRO {
     ch_versions = ch_versions.mix(MCQUANT.out.versions)
 
     if ( params.phenotyping ){
-        MAPS(MCQUANT.out.csv,
-            Channel.fromPath(params.pretrained_model_maps),
-            Channel.fromPath(params.label_id_maps),
-            Channel.fromPath(params.marker_sheet))
+        MCQUANT.out.csv.map {
+            [it[0],
+            it[1],
+            file(params.pretrained_model_maps),
+            file(params.label_id_maps),
+            file(params.marker_sheet)
+            ]}.set { maps_in }
+        MAPS(maps_in.map{ [it[0], it[1]] },
+            maps_in.map{ it[2] },
+            maps_in.map{ it[3] },
+            maps_in.map{ it[4] })
         ch_versions = ch_versions.mix(MAPS.out.versions)
     }
 
