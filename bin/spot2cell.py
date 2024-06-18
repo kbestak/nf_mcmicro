@@ -1,12 +1,11 @@
 import os
 import argparse
 import pathlib
-if os.name == 'nt':
-    pathlib.PosixPath = pathlib.WindowsPath
 from pathlib import Path
 import numpy as np
 from tifffile import imread
-
+if os.name == 'nt':
+    pathlib.PosixPath = pathlib.WindowsPath
 
 def get_args():
     # Create an argument parser
