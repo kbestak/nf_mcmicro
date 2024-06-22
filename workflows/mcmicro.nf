@@ -13,9 +13,11 @@ include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pi
 include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_mcmicro_pipeline'
 include { MULTIQC                } from '../modules/nf-core/multiqc/main'
 
+include { COMBINEQUANTIFICATIONS } from '../modules/local/combinequantifications'
 include { EXTRACTCHANNELS } from '../modules/local/extractchannels'
 include { UNSTITCH        } from '../modules/local/unstitch'
 include { RESTITCH        } from '../modules/local/restitch'
+include { SPOT2CELL       } from '../modules/local/spot2cell'
 include { SPOTIFLOW       } from '../modules/local/spotiflow'
 include { MAPS            } from '../modules/local/maps'
 
@@ -137,6 +139,7 @@ workflow MCMICRO {
 
         SPOTIFLOW(EXTRACTCHANNELS.out.extracted_channel)
         ch_versions =ch_versions.mix(SPOTIFLOW.out.versions)
+
     }
 
     if ( params.unstitch_restitch ){
@@ -194,6 +197,16 @@ workflow MCMICRO {
             mcquant_in.mask,
             [[:], file(params.marker_sheet)])
     ch_versions = ch_versions.mix(MCQUANT.out.versions)
+
+    if ( params.extract_channel ){
+        spot2cell_in = SPOTIFLOW.out.spots.join(segmentation_out)
+        SPOT2CELL(spot2cell_in)
+        ch_versions = ch_versions.mix(SPOT2CELL.out.versions)
+
+        combine_quantifications_in = MCQUANT.out.csv.join(SPOT2CELL.out.matched_spots)
+        COMBINEQUANTIFICATIONS(combine_quantifications_in)
+        ch_versions = ch_versions.mix(COMBINEQUANTIFICATIONS.out.versions)
+    }
 
     if ( params.phenotyping ){
         MCQUANT.out.csv.map {
