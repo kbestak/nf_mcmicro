@@ -5,7 +5,7 @@ process SPOT2CELL {
     container 'docker.io/kbestak/unstitch_restitch:0.0.1'
 
     input:
-    tuple val(meta), path(spots), path(seg_mask)
+    tuple val(meta), path(spots), path(seg_mask), path(image)
 
     output:
     tuple val(meta), path("*.csv"), emit: matched_spots
@@ -23,6 +23,7 @@ process SPOT2CELL {
         --spots ${spots} \\
         --mask ${seg_mask} \\
         --output ${prefix}.csv \\
+        --image ${image} \\
         $args
 
     cat <<-END_VERSIONS > versions.yml

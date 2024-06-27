@@ -199,7 +199,8 @@ workflow MCMICRO {
     ch_versions = ch_versions.mix(MCQUANT.out.versions)
 
     if ( params.extract_channel ){
-        spot2cell_in = SPOTIFLOW.out.spots.join(segmentation_out)
+        spot2cell_in = SPOTIFLOW.out.spots.join(segmentation_out).join(EXTRACTCHANNELS.out.extracted_channel)
+        spot2cell_in.view()
         SPOT2CELL(spot2cell_in)
         ch_versions = ch_versions.mix(SPOT2CELL.out.versions)
 

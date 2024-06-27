@@ -14,6 +14,8 @@ def get_args():
     parser.add_argument('-s', '--spots', type=str, help='Path to the spot table csv file.')
     parser.add_argument('-m', '--mask', type=str, help='Path to the cell mask tif file.')
     parser.add_argument('-o', '--output', type=str, help='Path to the output csv file.')
+    parser.add_argument('-i', '--image', type=str, help='Path to the respective 2d tif file.')
+    parser.add_argument('--threshold', type=int, default=150, help='Threshold for spot intensity determination.')
     args = parser.parse_args()
 
     # Standardize paths
@@ -21,11 +23,12 @@ def get_args():
     args.spots = Path(args.spots).resolve()
     args.mask = Path(args.mask).resolve()
     args.output = Path(args.output).resolve()
+    args.image = Path(args.image).resolve()
 
     return args
 
 
-def Spot2Cell(spots_path, mask_path, output_path):
+def Spot2Cell(spots_path, mask_path, output_path, image_path, threshold):
     """
     Assign spots to cells.
     :param spots_path: path to the spot table csv file
@@ -37,12 +40,19 @@ def Spot2Cell(spots_path, mask_path, output_path):
     spot_table = np.genfromtxt(spots_path, delimiter=',', skip_header=1, dtype=np.uint32)
     print(f"Total number of spots             = {spot_table.shape[0]}")
 
+    # Read image using tifffile
+    image = imread(image_path)
+    spot_intensities = image[spot_table[:, 0], spot_table[:, 1]]
+    spot_table_thresholded = spot_table[spot_intensities > threshold]
+    print(f"Number of spots =< threshold ({threshold}) = {len(spot_table) - len(spot_table_thresholded)}")
+    print(f"Number of spots > threshold ({threshold}) = {len(spot_table_thresholded)}")
+
     # Read cell mask using tifffile
     cell_mask = imread(mask_path)
     print(f"Total number of cells             = {cell_mask.max()}")
 
     # Index mask file at the spot table coordinate to get the cell id of each spot (0 for background)
-    spots = cell_mask[spot_table[:, 0], spot_table[:, 1]]
+    spots = cell_mask[spot_table_thresholded[:, 0], spot_table_thresholded[:, 1]]
 
     # Get the unique cell ids and their counts
     cell_ids, counts = np.unique(spots, return_counts=True)
@@ -74,7 +84,7 @@ def main():
     args = get_args()
 
     # Create an instance of the Spot2Cell class.
-    Spot2Cell(args.spots, args.mask, args.output)
+    Spot2Cell(args.spots, args.mask, args.output, args.image, args.threshold)
 
 
 if __name__ == '__main__':

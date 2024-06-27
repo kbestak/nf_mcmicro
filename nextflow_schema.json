@@ -101,6 +101,13 @@
                     "minimum": 0,
                     "maximum": 1
                 },
+                "spot_intensity_threshold": {
+                    "type": "integer",
+                    "default": 150,
+                    "description": "Threshold in spot channel required for a spot to be assigned to a cell.",
+                    "minimum": 0,
+                    "maximum": 65535
+                },
                 "phenotyping": {
                     "type": "boolean",
                     "description": "Should phenotyping with MAPS be performed (requires pretrained_model_maps parameter with model)"
