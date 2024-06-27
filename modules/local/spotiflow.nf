@@ -22,7 +22,8 @@ process SPOTIFLOW {
     spotiflow-predict \\
         ${image_2d} \\
         -o . \\
-        -n 8 8
+        -n 8 8 \\
+        $args
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -95,6 +95,12 @@
                     "description": "Which model should Deepcell Mesmer use - \"nuclear\", \"whole-cell\"",
                     "enum": ["nuclear", "whole-cell"]
                 },
+                "spotiflow_prob_threshold": {
+                    "type": "number",
+                    "description": "Probability threshold for Spotiflow to call spots - default value calculated from the image",
+                    "minimum": 0,
+                    "maximum": 1
+                },
                 "phenotyping": {
                     "type": "boolean",
                     "description": "Should phenotyping with MAPS be performed (requires pretrained_model_maps parameter with model)"
