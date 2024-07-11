@@ -108,6 +108,15 @@
                     "minimum": 0,
                     "maximum": 65535
                 },
+                "spot_dynamic_threshold": {
+                    "type": "boolean",
+                    "description": "Use dynamic threshold for spot filtering."
+                },
+                "spot_dynamic_threshold_k": {
+                    "type": "integer",
+                    "default": 2,
+                    "description": "Number of standard deviations from the mean used in dynamic threshold"
+                },
                 "phenotyping": {
                     "type": "boolean",
                     "description": "Should phenotyping with MAPS be performed (requires pretrained_model_maps parameter with model)"

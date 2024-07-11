@@ -16,6 +16,8 @@ def get_args():
     parser.add_argument('-o', '--output', type=str, help='Path to the output csv file.')
     parser.add_argument('-i', '--image', type=str, help='Path to the respective 2d tif file.')
     parser.add_argument('--threshold', type=int, default=150, help='Threshold for spot intensity determination.')
+    parser.add_argument('--dynamic_threshold', action="store_true",default=False, help='Use dynamic threshold for spot filtering.')
+    parser.add_argument('--dyn_threshold_k', type=int, default=2, required=False, help='Number of standard deviations from the mean to determine the threshold.' )
     args = parser.parse_args()
 
     # Standardize paths
@@ -27,8 +29,14 @@ def get_args():
 
     return args
 
+def dynamic_threshold(image, k=2):
+    mean = np.mean(image)
+    std_dev = np.std(image)
+    threshold = mean + k * std_dev
 
-def Spot2Cell(spots_path, mask_path, output_path, image_path, threshold):
+    return threshold
+
+def Spot2Cell(spots_path, mask_path, output_path, image_path, threshold, dyn_threshold, dyn_threshold_k):
     """
     Assign spots to cells.
     :param spots_path: path to the spot table csv file
@@ -43,6 +51,9 @@ def Spot2Cell(spots_path, mask_path, output_path, image_path, threshold):
     # Read image using tifffile
     image = imread(image_path)
     spot_intensities = image[spot_table[:, 0], spot_table[:, 1]]
+    print(dynamic_threshold)
+    if dyn_threshold:
+        threshold = dynamic_threshold(image[image>0], k=dyn_threshold_k)
     spot_table_thresholded = spot_table[spot_intensities > threshold]
     print(f"Number of spots =< threshold ({threshold}) = {len(spot_table) - len(spot_table_thresholded)}")
     print(f"Number of spots > threshold ({threshold}) = {len(spot_table_thresholded)}")
@@ -84,7 +95,7 @@ def main():
     args = get_args()
 
     # Create an instance of the Spot2Cell class.
-    Spot2Cell(args.spots, args.mask, args.output, args.image, args.threshold)
+    Spot2Cell(args.spots, args.mask, args.output, args.image, args.threshold, args.dynamic_threshold, args.dyn_threshold_k)
 
 
 if __name__ == '__main__':
