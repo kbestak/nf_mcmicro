@@ -34,6 +34,16 @@
             "emission_wavelength": {
                 "type": "integer",
                 "errorMessage": ""
+            },
+            "segmentation_channel": {
+                "type": ["integer", "string"],
+                "enum": [0, 1, 2, ""],
+                "errorMessage": "segmentation_compartment must be 0, 1, 2, or empty"
+            },
+            "quantification_type": {
+                "type": "string",
+                "pattern": "^(mean|median|quantile_\\d+|spot_sum)$",
+                "errorMessage": "quantification_type must be 'mean', 'median', 'quantile_{number}', or 'spot_sum'"
             }
         },
         "required": ["channel_number", "cycle_number", "marker_name"]
