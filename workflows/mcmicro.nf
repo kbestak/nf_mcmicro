@@ -100,7 +100,7 @@ workflow MCMICRO {
     }
 
     // Run Segmentation
-
+    ch_markersheet.view()
     ch_masks = Channel.empty()
 
     ch_segmentation_input
@@ -127,7 +127,7 @@ workflow MCMICRO {
     ch_mcquant_markers = ch_markersheet
         .flatMap{
             ['marker_name'] +
-            it.collect{ _1, _2, marker_name, _4, _5, _6 -> '"' + marker_name + '"' }
+            it.collect{ _1, _2, marker_name, _4, _5, _6, _7, _8 -> '"' + marker_name + '"' }
         }
         .collectFile(name: 'markers.csv', sort: false, newLine: true)
 

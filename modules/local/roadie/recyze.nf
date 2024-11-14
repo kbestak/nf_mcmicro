@@ -5,7 +5,7 @@ process ROADIE_RECYZE {
     container "ghcr.io/labsyspharm/mcmicro:roadie-2023-10-25"
 
     input:
-    tuple val(meta), path(image)
+    tuple val(meta), path(image), path(markers)
 
     output:
     tuple val(meta), path("*_segmentation{.ome}.tif"), emit: segmentation
@@ -22,6 +22,7 @@ process ROADIE_RECYZE {
     recyze.py \\
         --in ${image} \\
         --out ${prefix} \\
+        --markers ${markers} \\
         --num-threads $task.cpus \\
         $args \\
 

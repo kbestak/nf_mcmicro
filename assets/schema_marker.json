@@ -34,6 +34,14 @@
             "emission_wavelength": {
                 "type": "integer",
                 "errorMessage": ""
+            },
+            "segmentation_channel": {
+                "type": "integer",
+                "errorMessage": ""
+            },
+            "spot_channel": {
+                "type": "boolean",
+                "errorMessage": ""
             }
         },
         "required": ["channel_number", "cycle_number", "marker_name"]

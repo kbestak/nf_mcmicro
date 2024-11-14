@@ -4,6 +4,7 @@ import sys
 import tifffile
 import zarr
 import numpy as np
+import pandas as pd
 from ome_types import from_tiff, to_xml
 from pathlib import Path
 import argparse
@@ -326,23 +327,9 @@ if __name__ == '__main__':
     parser.add_argument('--y2', type=int, required=False, default=None, help="Crop Y2")
     parser.add_argument('--w', type=int, required=False, default=None, help="Crop Width")
     parser.add_argument('--h', type=int, required=False, default=None, help="Crop Height")
-    parser.add_argument(
-        '--channels', type=int, nargs="+", required=False, default=None, metavar="C",
-        help="Channels to keep (Default: all)",
-    )
-    parser.add_argument(
-        '--nuclear_channels', type=int, nargs="+", required=False, default=None, metavar="N",
-        help="Specifying nuclear channels to keep",
-    )
-    parser.add_argument(
-        '--membrane_channels', type=int, nargs="+", required=False, default=None, metavar="M",
-        help="Specifying membrane channels to keep",
-    )
+    parser.add_argument('--markers', type=str, required=True, help='Path to marker CSV file')
     parser.add_argument(
         '--projection', action='store_true', help="Use projection",
-    )
-    parser.add_argument(
-        '--extract_individually', type=int, nargs="+", help="Provide a list of channels to be extracted as a single-channel image.",
     )
     parser.add_argument(
         '--projection_type', action='store', type=str, required=False, default='max', help="What quantile should the projection take.",
@@ -353,6 +340,15 @@ if __name__ == '__main__':
     )
     parser.add_argument('--version', action='version', version='2.0.0dev')
     args = parser.parse_args()
+
+    # Load marker.csv and parse channels
+    marker_df = pd.read_csv(Path(args.marker_csv))
+
+    # Get channel indices for each type based on conditions
+    channel_list = marker_df[marker_df['segmentation_channel'].isin([0, 1])].index.tolist()
+    nuclear_channels = marker_df[marker_df['segmentation_channel'] == 0].index.tolist()
+    membrane_channels = marker_df[marker_df['segmentation_channel'] == 1].index.tolist()
+    extract_individually = marker_df[marker_df['spot_extraction']].index.tolist()
 
     # Automatically infer the output filename, if not specified
     in_path = vars(args)['in']
@@ -388,10 +384,10 @@ if __name__ == '__main__':
     tifffile.TIFF.MAXWORKERS = num_threads
     tifffile.TIFF.MAXIOWORKERS = num_threads * 5
 
-    writer = PyramidWriter(in_path, out_path, args.channels, args.nuclear_channels, args.membrane_channels, args.projection, args.projection_type, args.x, args.y, args.x2, args.y2, args.w, args.h)
+    writer = PyramidWriter(in_path, out_path, channel_list, nuclear_channels, membrane_channels, args.projection, args.projection_type, args.x, args.y, args.x2, args.y2, args.w, args.h)
     writer.run()
 
-    for channel in args.extract_individually:
+    for channel in extract_individually:
         out_path_channel = out_path.replace("_segmentation", f"_{channel}_spotdetection")
         writer = PyramidWriter(in_path, out_path_channel, [channel], None, None, None, None, args.x, args.y, args.x2, args.y2, args.w, args.h)
         writer.run()
