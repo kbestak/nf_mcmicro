@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import math
 import sys
 import tifffile
@@ -350,6 +351,7 @@ if __name__ == '__main__':
         '--num-threads', type=int, required=False, default=0, metavar="N",
         help="Worker thread count (Default: auto-scale based on number of available CPUs)",
     )
+    parser.add_argument('--version', action='version', version='2.0.0dev')
     args = parser.parse_args()
 
     # Automatically infer the output filename, if not specified
