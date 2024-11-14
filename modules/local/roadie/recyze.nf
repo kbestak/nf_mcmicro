@@ -8,8 +8,8 @@ process ROADIE_RECYZE {
     tuple val(meta), path(image), path(markers)
 
     output:
-    tuple val(meta), path("*_segmentation{.ome}.tif"), emit: segmentation
-    tuple val(meta), path("*_spotdetection.tif")     , emit: spotdetection
+    tuple val(meta), path("*_segprep.tif")           , emit: seg_prep
+    tuple val(meta), path("*_spotdetection.tif")     , emit: spot_detection, optional: true
     path "versions.yml"                              , emit: versions
 
     when:

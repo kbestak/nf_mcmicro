@@ -342,38 +342,32 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     # Load marker.csv and parse channels
-    marker_df = pd.read_csv(Path(args.marker_csv))
+    marker_df = pd.read_csv(Path(args.markers))
+    print(marker_df)
 
     # Get channel indices for each type based on conditions
-    channel_list = marker_df[marker_df['segmentation_channel'].isin([0, 1])].index.tolist()
-    nuclear_channels = marker_df[marker_df['segmentation_channel'] == 0].index.tolist()
-    membrane_channels = marker_df[marker_df['segmentation_channel'] == 1].index.tolist()
-    extract_individually = marker_df[marker_df['spot_extraction']].index.tolist()
+    channel_list = marker_df.loc[marker_df['segmentation_channel'].isin([0, 1])].index.tolist()
+    nuclear_channels = marker_df.loc[marker_df['segmentation_channel'] == 0].index.tolist()
+    membrane_channels = marker_df.loc[marker_df['segmentation_channel'] == 1].index.tolist()
+    if 'spot_extraction' in marker_df.columns:
+        extract_individually = marker_df.loc[marker_df['spot_extraction']].index.tolist()
+    else:
+        extract_individually = []
 
     # Automatically infer the output filename, if not specified
     in_path = vars(args)['in']
     out_path = args.out
 
     if out_path is None:
-        tokens = os.path.basename(in_path).split(os.extsep)
-
-        if len(tokens) < 2:
-            out_path = in_path + "_segmentation.tif"
-        elif tokens[-2] == "ome":
-            stem = os.extsep.join(tokens[0:-2]) + "_segmentation"
-            out_path = os.extsep.join([stem] + tokens[-2:])
+        if in_path.endswith('.ome.tif'):
+            out_path = in_path.replace('.ome.tif', '_segprep.ome.tif')
+        elif in_path.endswith('.tif'):
+            out_path = in_path.replace('.tif', '_segprep.tif')
         else:
-            stem = os.extsep.join(tokens[0:-1]) + "_segmentation"
-            out_path = os.extsep.join([stem, tokens[-1]])
+            out_path = in_path + "_segprep.tif"
 
-    if not (out_path.endswith("_segmentation.ome.tif") or out_path.endswith("_segmentation.tif")):
-        tokens = os.path.basename(out_path).split(os.extsep)
-        if tokens[-2] == "ome":
-            stem = os.extsep.join(tokens[0:-2]) + "_segmentation"
-            out_path = os.extsep.join([stem] + tokens[-2:])
-        else:
-            stem = os.extsep.join(tokens[0:-1]) + "_segmentation"
-            out_path = os.extsep.join([stem, tokens[-1]])
+    if not (out_path.endswith("_segprep.ome.tif") or out_path.endswith("_segprep.tif")):
+        out_path = out_path + "_segprep.tif"
 
     num_threads = args.num_threads
     if num_threads == 0:
@@ -388,6 +382,6 @@ if __name__ == '__main__':
     writer.run()
 
     for channel in extract_individually:
-        out_path_channel = out_path.replace("_segmentation", f"_{channel}_spotdetection")
+        out_path_channel = out_path.replace("_segprep", f"_{channel}_spotdetection")
         writer = PyramidWriter(in_path, out_path_channel, [channel], None, None, None, None, args.x, args.y, args.x2, args.y2, args.w, args.h)
         writer.run()

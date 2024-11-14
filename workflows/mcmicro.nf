@@ -19,6 +19,7 @@ include { CELLPOSE               } from '../modules/nf-core/cellpose/main'
 include { COREOGRAPH             } from '../modules/nf-core/coreograph/main'
 include { DEEPCELL_MESMER        } from '../modules/nf-core/deepcell/mesmer/main'
 include { MCQUANT                } from '../modules/nf-core/mcquant/main'
+include { ROADIE_RECYZE          } from '../modules/local/roadie/recyze'
 include { SCIMAP_MCMICRO         } from '../modules/nf-core/scimap/mcmicro/main'
 
 /*
@@ -100,7 +101,14 @@ workflow MCMICRO {
     }
 
     // Run Segmentation
-    ch_markersheet.view()
+    // Preprocessing with Roadie
+    ch_segmentation_input
+        .combine(Channel.fromPath(
+            params.marker_sheet)
+        ).set { roadie_in }
+
+    ROADIE_RECYZE(roadie_in)
+
     ch_masks = Channel.empty()
 
     ch_segmentation_input
