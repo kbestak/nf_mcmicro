@@ -73,11 +73,19 @@
                 "segmentation": {
                     "type": "string",
                     "pattern": "^((cellpose|mesmer)?,?)*(?<!,)$",
-                    "description": "comma separated list of segmentation modules to run. options are ['mesmer','cellpose']"
+                    "description": "comma separated list of segmentation modules to run. options are ['mesmer','cellpose']",
+                    "default": "mesmer"
+                },
+                "mesmer_compartment": {
+                    "type": "string",
+                    "default": "nuclear",
+                    "description": "If using Mesmer for segmentation, specifies compartment",
+                    "pattern": "^(nuclear|whole-cell)$"
                 },
                 "cellpose_model": {
                     "type": "string",
-                    "description": "optional model file for cellpose segmentation"
+                    "description": "optional model file for cellpose segmentation",
+                    "default": "[]"
                 },
                 "pixel_size": {
                     "type": "number",

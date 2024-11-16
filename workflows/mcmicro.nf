@@ -111,6 +111,8 @@ workflow MCMICRO {
 
     ch_masks = Channel.empty()
 
+    ROADIE_RECYZE.out.seg_prep.view()
+
     ch_segmentation_input
         .multiMap{ meta, image ->
             img: [meta + [segmenter: 'mesmer'], image]
