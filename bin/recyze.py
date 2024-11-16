@@ -8,6 +8,7 @@ import pandas as pd
 from ome_types import from_tiff, to_xml
 from pathlib import Path
 import argparse
+import re
 import os
 import uuid
 
@@ -343,14 +344,22 @@ if __name__ == '__main__':
 
     # Load marker.csv and parse channels
     marker_df = pd.read_csv(Path(args.markers))
-    print(marker_df)
+
+    # check if AF correction removed channels
+    # input image to recyze won't include channels where remove column is TRUE
+    if 'remove' in marker_df.columns:
+        # ==True because NaN values can be present
+        channels_excluded_from_image = marker_df.loc[marker_df['remove']==True].index.tolist()
+        marker_df = marker_df.drop(channels_excluded_from_image)
+        marker_df = marker_df.reset_index(drop=True)
 
     # Get channel indices for each type based on conditions
     channel_list = marker_df.loc[marker_df['segmentation_channel'].isin([0, 1])].index.tolist()
     nuclear_channels = marker_df.loc[marker_df['segmentation_channel'] == 0].index.tolist()
     membrane_channels = marker_df.loc[marker_df['segmentation_channel'] == 1].index.tolist()
-    if 'spot_extraction' in marker_df.columns:
-        extract_individually = marker_df.loc[marker_df['spot_extraction']].index.tolist()
+    if 'spot_channel' in marker_df.columns:
+        # ==True because NaN values can be present
+        extract_individually = marker_df.loc[marker_df['spot_channel']==True].index.tolist()
     else:
         extract_individually = []
 
@@ -382,6 +391,8 @@ if __name__ == '__main__':
     writer.run()
 
     for channel in extract_individually:
-        out_path_channel = out_path.replace("_segprep", f"_{channel}_spotdetection")
+        marker_name = marker_df.loc[channel, 'marker_name']
+        marker_name = re.sub('[^0-9a-zA-Z]+', '_', marker_name)
+        out_path_channel = out_path.replace("_segprep", f"_{marker_name}_{channel}_spotdetection")
         writer = PyramidWriter(in_path, out_path_channel, [channel], None, None, None, None, args.x, args.y, args.x2, args.y2, args.w, args.h)
         writer.run()
